@@ -98,14 +98,14 @@ async function submitAnswer(req, res) {
     if (qRows.length === 0) return res.status(404).json({ message: 'Question not found.' });
     const question = qRows[0];
 
-    // Prevent duplicate submissions for same question within 2 minutes
-    const [recent] = await db.query(
-      'SELECT id FROM mock_attempts WHERE question_id = ? AND user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 2 MINUTE)',
-      [question_id, req.user.id]
-    );
-    if (recent.length > 0) {
-      return res.status(429).json({ message: 'Please wait before submitting again for the same question.' });
-    }
+    // // Prevent duplicate submissions for same question within 2 minutes
+    // const [recent] = await db.query(
+    //   'SELECT id FROM mock_attempts WHERE question_id = ? AND user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 2 MINUTE)',
+    //   [question_id, req.user.id]
+    // );
+    // if (recent.length > 0) {
+    //   return res.status(429).json({ message: 'Please wait before submitting again for the same question.' });
+    // }
 
     // Save attempt
     const [attemptResult] = await db.query(

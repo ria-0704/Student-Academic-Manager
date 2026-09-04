@@ -15,57 +15,57 @@ function SubjectForm({ initial, onSave, onClose }) {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     if (initial?.id) {
-  //       const r = await api.put(`/subjects/${initial.id}`, form);
-  //       onSave(r.data.subject, 'update');
-  //     } else {
-  //       const r = await api.post('/subjects', form);
-  //       onSave(r.data.subject, 'create');
-  //     }
-  //     onClose();
-  //   } catch (err) {
-  //     showToast(err.userMessage, 'error');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (initial?.id) {
+        const r = await api.put(`/subjects/${initial.id}`, form);
+        onSave(r.data.subject, 'update');
+      } else {
+        const r = await api.post('/subjects', form);
+        onSave(r.data.subject, 'create');
+      }
+      onClose();
+    } catch (err) {
+      showToast(err.userMessage, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   setLoading(true);
 
-  // TEMPORARY DEMO MODE - no MySQL required
-  if (!initial?.id) {
-    const mockSubject = {
-      id: Date.now(),
-      name: form.name.trim(),
-      code: form.code.trim(),
-      description: form.description.trim(),
-      total_materials: 0,
-      completed_materials: 0
-    };
+//   // TEMPORARY DEMO MODE - no MySQL required
+//   if (!initial?.id) {
+//     const mockSubject = {
+//       id: Date.now(),
+//       name: form.name.trim(),
+//       code: form.code.trim(),
+//       description: form.description.trim(),
+//       total_materials: 0,
+//       completed_materials: 0
+//     };
 
-    onSave(mockSubject, 'create');
-    showToast('Subject added!', 'success');
-    onClose();
-    setLoading(false);
-    return;
-  }
+//     onSave(mockSubject, 'create');
+//     showToast('Subject added!', 'success');
+//     onClose();
+//     setLoading(false);
+//     return;
+//   }
 
-  // Real database operation for later
-  try {
-    const r = await api.put(`/subjects/${initial.id}`, form);
-    onSave(r.data.subject, 'update');
-    onClose();
-  } catch (err) {
-    showToast(err.userMessage, 'error');
-  } finally {
-    setLoading(false);
-  }
-};
+//   // Real database operation for later
+//   try {
+//     const r = await api.put(`/subjects/${initial.id}`, form);
+//     onSave(r.data.subject, 'update');
+//     onClose();
+//   } catch (err) {
+//     showToast(err.userMessage, 'error');
+//   } finally {
+//     setLoading(false);
+//   }
+// };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

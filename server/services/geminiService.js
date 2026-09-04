@@ -14,12 +14,56 @@ function getClient() {
 
 async function generateText(prompt, maxTokens = 4096) {
   const client = getClient();
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const result = await model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 },
+
+  const model = client.getGenerativeModel({
+    model: 'gemini-3.6-flash'
   });
-  return result.response.text();
+
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: maxTokens,
+          temperature: 0.7
+        },
+      });
+
+      return result.response.text();
+
+    } catch (error) {
+      const message = error?.message || '';
+
+      console.log(`Gemini attempt ${attempt}/${maxAttempts} failed`);
+
+      // Retry temporary server/rate-limit errors
+      if (
+        attempt < maxAttempts &&
+        (message.includes('503') ||
+         message.includes('Service Unavailable') ||
+         message.includes('429'))
+      ) {
+        const waitTime = attempt * 3000;
+
+        console.log(`Retrying Gemini in ${waitTime / 1000} seconds...`);
+
+        await new Promise(resolve =>
+          setTimeout(resolve, waitTime)
+        );
+
+        continue;
+      }
+
+      throw error;
+    }
+  }
 }
 
 // ── Summarize document ────────────────────────────────────────────────────────
