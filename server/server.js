@@ -43,6 +43,20 @@ app.use('/api/profile',     profileRoutes);
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'Student Academic Manager API running' }));
 
+// ── Serve React frontend in production ────────────────────────────────────────
+if (process.env.NODE_ENV === 'production') {
+  const clientPath = path.join(__dirname, '..', 'client', 'dist');
+
+  app.use(express.static(clientPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+
+    res.sendFile(path.join(clientPath, 'index.html'));
+  });
+}
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);

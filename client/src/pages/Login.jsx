@@ -27,30 +27,23 @@ export default function Login() {
   //     setLoading(false);
   //   }
   // };
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
 
-  // TEMPORARY DEMO LOGIN - does not require MySQL
-  if (
-    form.email === 'test@thapar.edu' &&
-    form.password === 'test123'
-  ) {
-    const mockUser = {
-      id: 1,
-      full_name: 'Test Student',
-      email: 'test@thapar.edu'
-    };
+  try {
+    const res = await api.post('/auth/login', form);
 
-    login('demo-token', mockUser);
-    showToast('Welcome back, Test Student!', 'success');
+    login(res.data.token, res.data.user);
+
+    showToast(`Welcome back, ${res.data.user.full_name}!`, 'success');
+
     navigate('/dashboard');
+  } catch (err) {
+    showToast(err.userMessage || 'Invalid email or password.', 'error');
+  } finally {
     setLoading(false);
-    return;
   }
-
-  showToast('Invalid demo email or password.', 'error');
-  setLoading(false);
 };
 
   return (
