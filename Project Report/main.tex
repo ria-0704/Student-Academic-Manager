@@ -1,0 +1,471 @@
+\documentclass{tietreport}
+\let\cleardoublepage\clearpage
+% Import images
+\usepackage{graphicx}
+
+% Bibliography configuration
+\usepackage[
+  date=year,
+  style=alphabetic,
+  backend=biber,
+  sorting=nty,
+  maxnames=5,
+  minnames=3,
+  maxalphanames=4,
+  minalphanames=3,
+  backref=true,
+  doi=false,
+  isbn=false,
+  url=false,
+  eprint=false
+]{biblatex}
+\addbibresource{references.bib}
+
+%% ==================================================
+%% CUSTOMIZE THESE FIELDS FOR YOUR PROJECT
+%% ==================================================
+
+% Course/Lab header
+\TitlePageHeader{%
+  UCS503 - SOFTWARE ENGINEERING%
+}
+
+% Main project title
+\ProjectTitle{%
+  Student Academic Manager%
+}
+
+% Subtitle or project description
+\ProjectSubTitle{%
+  A Centralized Web-Based System for Academic Organization and AI-Assisted Learning%
+}
+
+% Student information (up to 4 students)
+\author{%
+  \texttt{1024030621} Ria Bansal \\
+  \texttt{1024030619} Avneet Kaur Bhatia \\
+  \texttt{1024030604} Ishaan Garg \\
+  %
+}
+
+% Group number, degree, year, program
+\TitlePageSubText{%
+  Group: \texttt{3C44} BE Third Year, CSE%
+}
+
+% Faculty advisor/guide name
+\AdvisorName{%
+  Dr. Raghav B. Venkataramaiyer%
+}
+
+% Evaluation period and department info
+\TitlePageFooterText{{%
+    \large Mid-Semester Evaluation \\[0.2cm]
+    \bfseries Computer Science and Engineering
+    Department%
+  } \\[0.15cm]
+  Thapar Institute of Engineering and Technology,
+  Patiala%
+}
+
+%% ==================================================
+
+\begin{document}
+
+% Generate title page
+\maketitle
+
+% Table of contents (auto-generated from chapters)
+\tableofcontents
+
+% ===== CHAPTER 1: INTRODUCTION =====
+
+\chapter{Introduction}
+
+\section{Background and Context}
+
+University students manage a large amount of academic information, including course syllabus, study materials, examinations, assignments, revision schedules, and performance records. In many cases, these resources are distributed across different platforms, folders, applications, and personal notes. This makes it difficult for students to maintain an organized study workflow and monitor their academic progress effectively.
+
+The Student Academic Manager is a full-stack web application developed specifically to provide students with a centralized platform for managing their academic activities. The system combines academic organization, study-material management, examination preparation, performance tracking, and AI-assisted learning into a single application.
+
+The application allows students to create and manage subjects, organize their syllabus into units, upload study materials, track the completion status of materials, and maintain their examination datesheet. It also provides AI-based features such as generation of university-style mock questions, evaluation of written answers, and AI-assisted study planning.
+
+The system uses a client-server architecture in which the React frontend communicates with a Node.js and Express.js backend. MySQL is used for persistent storage of user accounts, subjects, units, study materials, mock questions, attempts, evaluations, examinations, and study-planner tasks. AI functionality is provided through the Google Gemini API.
+
+By combining these features into one platform, the project aims to reduce fragmentation in academic management and provide students with a structured and intelligent study environment.
+
+\subsection{Problem Statement}
+
+Students often use multiple disconnected tools to manage their academic activities. Study materials may be stored in different locations, examination dates may be maintained separately, and performance tracking may require manual effort. In addition, students may have difficulty revising lengthy study materials and obtaining meaningful feedback on written answers.
+
+The specific problem addressed by this project is the lack of a centralized academic management system that combines study-material organization, syllabus management, examination planning, performance tracking, and AI-assisted learning in a single platform.
+
+The proposed system addresses this problem by providing a web-based Student Academic Manager with the following capabilities:
+\begin{itemize}
+\item Centralized management of subjects and syllabus units.
+Uploading and organization of PDF, PPT, and PPTX study materials.
+\item Tracking of study-material completion status.
+\item AI-generated theoretical mock questions.
+\item AI-based evaluation of students' written answers.
+\item Examination datesheet and countdown management.
+\item Manual and AI-assisted study planning.
+\item Performance analytics and score visualization.
+\item Secure student authentication using institutional email addresses
+
+\end{itemize}
+\section{Project Objectives}
+
+\begin{enumerate}
+  \item \textbf{Objective 1:} To develop a centralized academic management platform that enables students to manage subjects, syllabus units, study materials, examinations, and study tasks from a single web application.
+  \item \textbf{Objective 2:} To implement an AI-assisted learning system generate university-style theoretical questions, and evaluate student answers with scores, feedback, missing points, and model answers.
+  \item \textbf{Objective 3:} To develop an academic performance and planning module that allows students to maintain examination schedules, create study tasks, monitor completion, and visualize academic performance.
+    \item \textbf{Objective 4:} To implement secure user authentication and data management using institutional email verification, password hashing, JWT-based authentication, and a relational MySQL database
+    \item \textbf{Objective 5:} To provide a user-friendly and responsive web interface through which students can access their academic information and learning tools efficiently
+\end{enumerate}
+
+% Document your SMART objectives (Specific,
+% Measurable, Achievable, Relevant, Time-bound)
+% clearly for your evaluators.
+
+% ===== CHAPTER 2: METHODOLOGY & DESIGN =====
+
+\chapter{Methodology and Design}
+
+\section{System Architecture}
+
+The Student Academic Manager follows a three-layer client-server architecture consisting of the presentation layer, application layer, and data layer.
+
+The presentation layer is implemented using React and provides the user interface through which students interact with the system. The application layer is implemented using Node.js and Express.js and is responsible for authentication, business logic, API handling, file processing, database communication, and AI integration. The data layer uses MySQL for persistent storage of academic and user information.
+
+The major flow of the system is:
+
+\textbf{Student → React Frontend → REST API → Express Backend → MySQL Database}
+
+For AI-based features, the backend communicates with the Google Gemini API. Uploaded academic documents are processed by the backend, where text is extracted before being used for learning functionality.
+
+\subsection{High-Level Design}
+
+The system consists of the following major components:
+
+\begin{enumerate}
+
+    \item \textbf{Authentication Module}
+
+    The authentication module handles student registration and login. Registration is restricted to institutional email addresses. Passwords are securely stored using hashing, while JWT tokens are used to maintain authenticated sessions.
+
+    \item \textbf{Subject and Syllabus Management}
+
+    Students can create, update, and delete subjects. Each subject can contain multiple syllabus units, allowing academic content to be organized according to the course structure.
+
+    \item \textbf{Study Material Management}
+
+    Students can upload PDF, PPT, and PPTX files and associate them with a particular subject and unit. The system stores information about the uploaded files and maintains their study status as \textit{Not Started}, \textit{In Progress}, or \textit{Completed}.
+
+
+    \item \textbf{Mock Practice and AI Evaluation}
+
+    The system can generate theoretical questions based on a student's subject and study content. Students can submit written answers, after which the AI evaluates the response and provides a score, strengths, missing points, incorrect points, improvement suggestions, and a model answer.
+
+    \item \textbf{Examination and Study Planner}
+
+    The datesheet module allows students to maintain examination information including subject, date, time, location, and notes. The planner allows students to create study tasks and can also generate study plans using AI assistance.
+
+    \item \textbf{Performance Analytics}
+
+    The performance module collects examination and mock-practice information and presents academic performance using charts and comparative analysis.
+
+\end{enumerate}
+
+\subsection{Technical Stack}
+
+\textbf{Framework/Language:}
+
+\begin{itemize}
+    \item JavaScript
+    \item React 18
+    \item Node.js
+    \item Express.js
+    \item HTML5
+    \item CSS
+    \item Tailwind CSS
+\end{itemize}
+
+\textbf{Database:}
+
+\begin{itemize}
+    \item MySQL
+    \item MySQL2 Node.js driver
+\end{itemize}
+
+\textbf{AI Technology:}
+
+\begin{itemize}
+    \item Google Gemini API
+    \item Gemini 3.6 Flash
+\end{itemize}
+
+\textbf{Authentication and Security:}
+
+\begin{itemize}
+    \item JSON Web Tokens (JWT)
+    \item bcryptjs
+    \item Parameterized SQL queries
+\end{itemize}
+
+\textbf{Development Tools:}
+
+\begin{itemize}
+    \item Visual Studio Code
+    \item Git/GitHub
+    \item MySQL Workbench
+    \item Node Package Manager (npm)
+    \item Vite
+\end{itemize}
+
+\textbf{Libraries and Supporting Technologies:}
+
+\begin{itemize}
+    \item React Router
+    \item Axios
+    \item Recharts
+    \item Lucide React
+    \item Multer
+    \item pdf-parse
+    \item officeparser
+\end{itemize}
+
+React Router is used for frontend navigation, Axios is used for communication with the backend APIs, Recharts is used for performance visualization, and Multer is used for handling file uploads.
+
+\section{Implementation Details}
+The application was implemented using a modular full-stack architecture. The frontend is divided into reusable components, pages, contexts, services, and utilities, while the backend follows a controller-route architecture.
+
+The backend contains separate controllers and routes for authentication, subjects, units, materials, summaries, mock practice, attempts, examinations, planning, performance, dashboard, and profile management.
+
+The MySQL database uses relational tables with primary keys and foreign-key relationships to maintain consistency between users and their academic data.
+\subsection{Module 1: Core Functionality}
+The core functionality of the system consists of authentication, subject management, syllabus organization, and study-material management.
+
+The authentication module provides registration and login functionality. Students are required to use University email address. Passwords are hashed before storage in the database, and JWT tokens are used for authenticated requests.
+
+After authentication, students can create subjects and assign subject codes and descriptions. Each subject can contain multiple units, enabling students to represent their course syllabus in a structured manner.
+
+The study-material module allows students to upload PDF, PPT, and PPTX files. The backend uses Multer for file handling and stores uploaded files in user-specific directories. Metadata such as filename, file type, file size, subject, unit, and study status is stored in the MySQL database.
+
+The system also extracts text from supported documents using pdf-parse and officeparser. The extracted text is subsequently available for AI-assisted processing
+
+
+\subsection{Module 2: AI-Assisted Learning and Academic Planning}
+
+The second major module focuses on intelligent learning assistance and academic planning.
+
+The Mock Practice module uses Gemini to generate theoretical questions according to the student's academic context. Questions can be categorized according to difficulty and question type.
+
+The AI Evaluation module evaluates the student's written response. The evaluation includes a numerical score and multiple qualitative components such as conceptual understanding, accuracy, completeness, structure, examples, strengths, missing points, incorrect points, improvement suggestions, and a model answer.
+
+The Study Planner module supports both manually created tasks and AI-generated study plans. Tasks contain information such as subject, unit, date, estimated duration, priority, and completion status.
+
+The Performance module provides visual analytics of academic performance. This allows students to identify performance trends and compare their results across subjects and different types of assessments.
+
+% ===== CHAPTER 3: RESULTS & EVALUATION =====
+
+\chapter{Results and Evaluation}
+
+\section{Testing Methodology}
+
+
+The Student Academic Manager was tested at different levels to verify the correctness and integration of its major components.
+
+\vspace{\baselineskip}
+\textbf{Unit Testing}
+\vspace{\baselineskip}
+
+Individual backend controllers, API routes, authentication operations, database queries, and frontend components were tested independently. CRUD operations for subjects, units, examinations, and planner tasks were checked using different input conditions.
+
+Authentication functionality was tested using valid and invalid credentials, while input validation was tested using incomplete and incorrect information.
+
+\vspace{\baselineskip}
+\textbf{Integration Testing}
+\vspace{\baselineskip}
+
+Integration testing was performed to verify communication between the React frontend, Express backend, and MySQL database.
+
+The following workflows were tested:
+
+\begin{itemize}
+    \item User registration and login.
+    \item Subject creation and retrieval.
+    \item Unit creation under a subject.
+    \item Study-material upload.
+    \item Retrieval of uploaded materials.
+    \item Study-status updates.
+    \item Mock-question generation.
+    \item Answer submission and AI evaluation.
+    \item Examination creation and retrieval.
+    \item Planner task creation and completion.
+    \item Performance-data retrieval.
+\end{itemize}
+
+\vspace{\baselineskip}
+\textbf{Performance Testing}
+\vspace{\baselineskip}
+
+The application was tested during normal local development conditions to verify that API requests, database operations, file uploads, and frontend navigation function correctly.
+
+Particular attention was given to database connectivity, API response handling, file-processing operations, and AI API requests because these operations directly affect the responsiveness of the application.
+
+\vspace{\baselineskip}
+\textbf{User Testing}
+\vspace{\baselineskip}
+
+The major workflows were evaluated from the perspective of a university student. The usability of navigation, subject organization, study-material management, mock practice, examination planning, and performance visualization was considered during testing.
+
+\section{Performance Metrics}
+
+Since this project is primarily a functional academic management application rather than a high-throughput production system, evaluation was focused mainly on functional correctness, feature completeness, integration, and usability:
+
+%\begin{table}[h]
+%\centering
+%\begin{tabular}{|l|r|r|}
+ % \hline
+  %\textbf{Metric} & \textbf{Target} &
+  %\textbf{Achieved} \\
+  %\hline
+  %Response Time & $< 100$ms & $85$ms \\
+  %\hline
+  %Accuracy & $> 95\%$ & $97.2\%$ \\
+  %\hline
+  %Throughput & $1000$ req/s & $1250$ req/s \\
+  %\hline
+%\end{tabular}
+%\caption{Performance Results Summary}
+%\label{tab:performance}
+%\end{table}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+  \hline
+  \textbf{Metric} & \textbf{Target} & \textbf{Achieved} \\
+  \hline
+  User Authentication & Secure registration and login & Implemented \\
+  \hline
+  Subject Management & Complete CRUD operations & Implemented \\
+  \hline
+  Unit Management & Complete CRUD operations & Implemented \\
+  \hline
+  Study Material Management & PDF/PPT/PPTX upload and organization & Implemented \\
+  \hline
+  Study Status Tracking & Three study states & Implemented \\
+  \hline
+  Mock Question Generation & AI-generated questions & Implemented \\
+  \hline
+  AI Answer Evaluation & Score and detailed feedback & Implemented \\
+  \hline
+  Examination Management & Datesheet and countdown & Implemented \\
+  \hline
+  Study Planner & Manual and AI-assisted planning & Implemented \\
+  \hline
+  Performance Analytics & Visual performance analysis & Implemented \\
+  \hline
+\end{tabular}
+\caption{System Requirements Achievement Summary}
+\label{tab:requirements}
+\end{table}
+
+\section{Analysis}
+
+The project successfully meets its primary objective of developing a centralized academic management platform. Students can organize subjects and syllabus units, upload study materials, maintain examination schedules, and manage study tasks from one application.
+
+The AI integration extends the functionality beyond traditional academic management systems.The mock-practice module allows students to generate questions and receive automated evaluation of their written responses.
+
+The relational database design provides structured storage for users and their academic information. Foreign-key relationships ensure that academic records remain associated with the appropriate users, subjects, and units.
+
+One of the major challenges during implementation is the integration of multiple independent technologies. The project requires communication between React, Express, MySQL, file-processing libraries, and the Gemini API. Another challenge is handling uploaded documents and extracting usable text before sending the content for AI processing.
+
+These challenges were addressed through modular backend controllers, separate API routes, middleware for authentication and file handling, parameterized SQL queries, and a dedicated Gemini service.
+
+% ===== CHAPTER 4: CONCLUSION =====
+
+\chapter{Conclusion}
+
+\section{Summary of Work}
+
+The Student Academic Manager was developed as a full-stack web application to provide University students with a centralized academic management and learning platform.
+
+The system provides authentication, subject and syllabus management, study-material organization, mock-question generation, AI-based answer evaluation, examination scheduling, study planning, and performance analytics.
+
+The project integrates a React-based frontend with a Node.js and Express.js backend and a MySQL relational database. Google Gemini is integrated through the backend to provide AI-based academic assistance.
+
+The implemented system fulfills the major objectives defined at the beginning of the project by combining academic organization and intelligent learning assistance into a single platform..
+
+\section{Key Findings}
+
+\begin{itemize}
+  \item \textbf{Finding 1:} A centralized academic platform can combine multiple student activities such as syllabus management, study-material organization, examination planning, and performance tracking into a single workflow
+  \item \textbf{Finding 2:} AI integration can enhance traditional study-management systems by automatically practice questions, study plans, and feedback on written answers
+  \item \textbf{Finding 3:} A relational database is effective for maintaining structured relationships between students, subjects, units, study materials, examinations, study tasks, questions, and evaluation records.
+    \item \textbf{Finding 4:} Separating the frontend, backend, database, and AI service into independent components makes the application easier to maintain and extend
+\end{itemize}
+
+\section{Future Work and Recommendations}
+
+The following improvements can be considered for future versions of the Student Academic Manager:
+
+%\begin{enumerate}
+ % \item Potential enhancements to your system~\cite{latex2e}
+  %\item Alternative approaches worth exploring
+  %\item Scalability improvements
+  %\item Integration with other systems
+  %\item Real-world deployment considerations
+%\end{enumerate}
+
+\begin{enumerate}
+    \item \textbf{Potential enhancements to the system:} Add notifications and reminders for upcoming examinations, incomplete study tasks, and pending revision activities.
+    
+    \item \textbf{Alternative AI approaches:} Additional AI models could be integrated to generate summaries, questions, and evaluations and improve reliability.
+
+    \item \textbf{Scalability improvements:} The application could be deployed using cloud infrastructure with managed databases, object storage, caching, and load balancing to support a larger number of users.
+
+    \item \textbf{Integration with other systems:} The platform could be integrated with university academic portals, calendars, learning-management systems, or institutional course information systems.
+
+    \item \textbf{Real-world deployment:} Future versions could implement production-grade cloud deployment, HTTPS, automated backups, stronger monitoring, centralized logging, rate limiting, and enhanced security controls.
+
+    \item \textbf{Advanced analytics:} Machine-learning models could be introduced to identify weak subjects, predict academic performance, and recommend personalized revision schedules.
+
+    \item \textbf{Mobile support:} A dedicated mobile application or Progressive Web App could be developed to allow students to access their study plans and academic information conveniently from mobile devices.
+
+    \item \textbf{Collaborative learning:} Future versions could support sharing of study resources, collaborative notes, peer discussions, and group study planning.
+
+\end{enumerate}
+\section{Final Remarks}
+
+The Student Academic Manager demonstrates how modern web technologies and artificial intelligence can be combined to address practical academic-management challenges faced by university students.
+
+The project provided practical experience in full-stack development, relational database design, REST API development, authentication, file processing, frontend development, and AI API integration. It also demonstrated the importance of designing modular systems in which individual components can be developed, tested, and extended independently.
+
+The developed platform provides a foundation for a more comprehensive academic assistant that can evolve from a personal study-management application into a scalable intelligent learning platform for university students.
+
+% ===== BIBLIOGRAPHY =====
+%\clearpage
+
+%\nocite{*}
+% Print bibliography with heading in TOC
+%\printbibliography[heading=bibintoc]
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\begin{enumerate}
+    \item React Documentation. \textit{React -- A JavaScript Library for Building User Interfaces}. Meta Platforms, Inc.
+
+    \item Node.js Documentation. \textit{Node.js Documentation}. OpenJS Foundation.
+
+    \item Express.js Documentation. \textit{Express -- Node.js Web Application Framework}.
+
+    \item MySQL Documentation. \textit{MySQL 8.4 Reference Manual}. Oracle Corporation.
+
+    \item Google. \textit{Gemini API Documentation}. Google AI for Developers.
+
+    \item Vite Documentation. \textit{Vite -- Next Generation Frontend Tooling}.
+
+    \item Tailwind CSS Documentation. \textit{Tailwind CSS Documentation}.
+\end{enumerate}
+\end{document}
