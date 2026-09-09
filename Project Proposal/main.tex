@@ -1,0 +1,373 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Lab Instructor
+\makeatletter
+\newcommand{\BvrSetLabInstructor}[1]{%
+  \gdef\Bvr@LabInstructor{#1}}
+\newcommand{\Bvr@LabInstructor}{Dr. Raghav B. Venkataramaiyer}
+\newcommand{\BvrLabInstructorValue}{\Bvr@LabInstructor}
+\makeatother
+
+% Hints in the section title(s)
+\newcommand{\BvrHint}[1]{%
+  {\normalfont\normalsize\itshape\hfill #1}}
+
+\title{
+    \textbf{\Large Student Academic Manager}\\[0.5em]
+    \large Project Proposal for UCS503\\
+    Submitted to: \BvrLabInstructorValue\\
+    \textbf{Thapar Institute of Engineering and Technology}
+}
+
+\BvrSetLabInstructor{Dr. Raghav B. Venkataramaiyer}
+
+\author{
+  Ria Bansal, CSED%
+  \thanks{Roll No: \texttt{1024030621}, %
+    Email: \texttt{rbansal1\_be24\@thapar.edu}}
+  \and 
+  Avneet Kaur Bhatia, CSED%
+  \thanks{Roll No: \texttt{1024030619}, %
+    Email: \texttt{abhatia2\_be24\@thapar.edu}}
+    \and
+    Ishaan Garg, CSED%
+  \thanks{Roll No: \texttt{1024030604}, %
+    Email: \texttt{igarg1\_be24\@thapar.edu}}
+}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Higher-order goal%
+  \BvrHint{\ldots secondary framing}}
+This project aims to improve the organization, accessibility, and effectiveness of academic management for students through a centralized web-based platform. While academic activities are often distributed across different applications, documents, and manual processes, the immediate engineering objective is to integrate essential academic-management functions into a single system that provides students with a structured and convenient learning environment.
+
+The proposed Student Academic Manager (SAM) combines academic record management with learning and self-assessment capabilities. In addition to managing academic information, the system introduces a mock-test feature in which students can upload handwritten answers, extract the written content using Optical Character Recognition (OCR), and obtain an automated evaluation based on the submitted answer.
+
+\section{Time-to-value %
+\BvrHint{\ldots primary heuristic}}
+
+\begin{itemize}
+    \item Develop the core academic-management workflow first, followed by mock tests and handwritten-answer evaluation.
+
+    \item Build modules such as authentication, academic records, mock tests, OCR, and evaluation independently for faster development and testing.
+
+    \item Prioritize a functional end-to-end system before adding secondary features and interface refinements.
+
+    \item Continuously test the frontend, backend, database, and OCR integration to identify and resolve issues early.
+\end{itemize}
+
+\section{Problem Statement}
+Students commonly manage their academic activities using multiple disconnected platforms and manual resources. Academic records, study materials, tests, marks, and self-assessment activities may be maintained separately, making it difficult for students to obtain a consolidated view of their academic progress.
+
+Common challenges include:
+
+\begin{itemize}
+    \item \textbf{Fragmentation:} Academic information and learning activities are distributed across different platforms, files, and applications.
+
+    \item \textbf{Manual management:} Students may need to maintain academic records, test performance, and other information manually.
+
+    \item \textbf{Limited self-assessment:} Conventional online tests generally require students to enter answers directly into a digital interface and may not reflect handwritten examination practices.
+
+    \item \textbf{Manual evaluation effort:} Handwritten answers require significant effort to review and evaluate, particularly when students want frequent practice.
+
+    \item \textbf{Lack of centralized progress tracking:} Students may not have a single interface through which they can view academic information and monitor their performance across mock tests.
+
+    \item \textbf{Difficulty in digitizing handwritten responses:} Handwritten answers are naturally produced on paper, but converting these responses into machine-readable text for further processing is challenging because handwriting varies considerably between individuals.
+\end{itemize}
+
+\subsection{Why This Matters Now -- Contextual Relevance}
+
+With increasing dependence on digital academic tools, there is a need for systems that combine \textbf{academic management with active learning and self-assessment}. A centralized platform can reduce repetitive manual work while providing students with a more structured way to monitor their academic activities and practice examination-style questions.
+
+The addition of handwritten-answer processing makes the system particularly relevant to examination preparation, where students frequently write answers on paper rather than typing them.
+
+\section{Proposed Solution %
+\BvrHint{\ldots Software Proposition}}
+\subsection{Overview}
+\begin{itemize}
+    \item \textbf{Student authentication:} Secure registration/login and user-specific access to academic information.
+
+    \item \textbf{Academic management:} Centralized storage and presentation of relevant student academic information.
+
+    \item \textbf{Dashboard:} A consolidated interface for accessing academic information, tests, performance, and other system features.
+
+    \item \textbf{Mock-test module:} Students can attempt tests consisting of academic questions.
+
+    \item \textbf{Handwritten-answer submission:} Students can write answers on paper, capture/scan them, and upload the resulting image.
+
+    \item \textbf{OCR processing:} The uploaded handwritten answer is processed to extract machine-readable text.
+
+    \item \textbf{Automated evaluation:} The extracted answer is compared with the expected answer or evaluation criteria to generate an assessment.
+
+    \item \textbf{Performance tracking:} Test results and evaluation outcomes can be stored and presented to students for future reference.
+\end{itemize}
+
+\subsection{Core workflow}
+\begin{enumerate}
+    \item The student logs into the \textbf{SAM} platform.
+
+    \item The student accesses the mock-test module and selects an available test.
+
+    \item Questions are displayed along with the required answer format.
+
+    \item The student writes the answers on paper.
+
+    \item The student uploads an image of the handwritten answer.
+
+    \item The system preprocesses the uploaded image and applies OCR to extract the handwritten text.
+
+    \item The extracted text is processed and matched against the expected answer/evaluation criteria.
+
+    \item The system generates an evaluation based on the answer.
+
+    \item The student can view the result, extracted response, and relevant performance information.
+
+    \item Test results are stored so that performance can be monitored over subsequent attempts.
+\end{enumerate}
+
+\subsection{Operational constraints for a semester-scale academic system}
+\begin{enumerate}
+    \item The application will use a responsive web interface so that students can access it from commonly available laptops and smartphones.
+
+    \item The OCR component will use existing OCR technologies/APIs or libraries rather than attempting to develop a handwriting-recognition model from scratch.
+
+    \item The system will focus on reliable integration of academic management, OCR processing, and evaluation rather than claiming state-of-the-art handwriting recognition.
+
+    \item Evaluation results will be treated as automated assistance rather than an absolute replacement for human academic assessment.
+
+    \item Uploaded handwritten-answer images will be limited to appropriate formats and sizes to maintain reasonable processing time and storage requirements.
+\end{enumerate}
+
+\section{Solution Approach %
+\BvrHint{\ldots Engineering focus}}
+This is primarily a software-engineering project. The focus is on developing an integrated academic-management platform and successfully connecting its frontend, backend, database, OCR, and evaluation components into a functional workflow.
+
+\subsection{Handwritten-answer OCR and evaluation %
+\BvrHint{\ldots AI-assisted component}}
+The handwritten-answer feature will follow a multi-stage processing pipeline:
+
+\begin{enumerate}
+    \item \textbf{Image Upload:} The student uploads a clear image or scanned copy of the handwritten answer.
+
+    \item \textbf{Image Preprocessing:} The system may perform operations such as resizing, noise reduction, contrast enhancement, or thresholding to improve OCR performance.
+
+    \item \textbf{Text Extraction:} An OCR engine processes the image and converts the handwriting into machine-readable text.
+
+    \item \textbf{Text Processing:} The extracted text is cleaned and normalized before evaluation.
+
+    \item \textbf{Answer Evaluation:} The processed response is compared with the expected answer using suitable text-matching or semantic evaluation techniques.
+
+    \item \textbf{Result Generation:} The system generates a score or evaluation and displays the result to the student.
+
+    \item \textbf{Storage:} The relevant test attempt and result are stored in the database for future performance tracking.
+\end{enumerate}
+
+Because handwriting recognition can be affected by image quality, handwriting style, and layout, the system will explicitly account for OCR limitations rather than assuming perfect extraction.
+
+\subsection{Web architecture %
+\BvrHint{\ldots web-based solution}}
+The application will follow a typical \textbf{three-tier web architecture}:
+
+\begin{itemize}
+    \item \textbf{Frontend:} Provides the student interface for authentication, academic information, mock tests, answer uploads, and result visualization.
+
+    \item \textbf{Backend:} Handles authentication, API requests, test management, file processing, OCR integration, evaluation logic, and communication with the database.
+
+    \item \textbf{Database:} Stores student information, academic records, test questions, test attempts, extracted answers, and evaluation results.
+
+    \item \textbf{OCR/Evaluation Layer:} Processes uploaded handwritten-answer images and converts them into text before passing the response to the evaluation component.
+\end{itemize}
+
+The separation of these components will make the application easier to test, maintain, and extend.
+
+\subsection{Testing and integration}
+Testing will be performed throughout development rather than only after implementation.
+
+The testing process will include:
+
+\begin{itemize}
+    \item \textbf{Unit testing:} Individual backend functions and evaluation logic will be tested independently.
+
+    \item \textbf{Integration testing:} Communication between frontend, backend, database, OCR, and evaluation components will be tested.
+
+    \item \textbf{Input validation:} Invalid login details, unsupported files, oversized uploads, and incomplete test submissions will be handled appropriately.
+
+    \item \textbf{OCR validation:} Handwritten samples with different image qualities will be used to identify extraction errors.
+
+    \item \textbf{End-to-end testing:} The complete workflow from mock-test attempt to handwritten-answer upload and evaluation will be tested.
+
+    \item \textbf{User testing:} A small group of students can test the system to identify usability issues and practical limitations.
+\end{itemize}
+
+\section{Evaluation Criterion %
+\BvrHint{\ldots measurable and attributable}}
+The effectiveness of SAM will be evaluated using measurable criteria associated with its major workflows.
+
+\subsection{Primary evaluation metric}
+\textbf{End-to-end mock-test processing success:} the percentage of valid handwritten-answer submissions that successfully pass through image upload, OCR extraction, evaluation, and result generation without system failure.
+
+\textbf{Target:} At least \textbf{90\% successful processing} for valid test submissions under the defined testing conditions.
+
+\textbf{Attribution:} The system will log successful and unsuccessful processing attempts at each stage of the workflow.
+
+\subsection{Secondary evaluation metrics}
+\begin{enumerate}
+    \item \textbf{OCR extraction quality:} Measure the accuracy of extracted text against manually transcribed handwritten samples.
+
+    \item \textbf{Evaluation consistency:} Compare automated evaluation results with manually evaluated sample answers.
+
+    \item \textbf{Processing time:} Measure the time required from answer upload to generation of the evaluation result.
+
+    \item \textbf{System reliability:} Verify that authentication, test submission, file upload, and result retrieval operate correctly during testing.
+
+    \item \textbf{User usability:} Collect student feedback regarding ease of attempting tests, uploading answers, and understanding evaluation results.
+
+    \item \textbf{Academic-management accessibility:} Evaluate whether students can access relevant academic information and test results from a centralized interface.
+\end{enumerate}
+
+\subsection{validation plan %
+\BvrHint{\ldots high-level}}
+\begin{enumerate}
+    \item Prepare a collection of handwritten answer samples with different handwriting styles and image qualities.
+
+    \item Process the samples through the OCR pipeline and compare extracted text against manually transcribed text.
+
+    \item Conduct mock-test attempts using representative academic questions.
+
+    \item Compare automated evaluations with manually evaluated answers for a subset of responses.
+
+    \item Measure processing time and identify common OCR/evaluation failure cases.
+
+    \item Conduct user testing with a small group of students and collect structured feedback on usability and usefulness.
+\end{enumerate}
+
+\section{Scalability %
+\BvrHint{\ldots with foresight}}
+The system should be designed so that additional students, tests, and academic records can be supported without requiring major architectural changes..
+
+\begin{enumerate}[leftmargin=0.7cm]
+    \item \textbf{Scalable (theoretically):} The system can support increasing amounts of academic and test data through:
+
+\begin{itemize}
+    \item Separate frontend and backend components.
+
+    \item Database indexing for frequently accessed records.
+
+    \item Pagination for academic records, tests, and results.
+
+    \item Efficient API-based communication.
+
+    \item Modular OCR and evaluation services that can be improved independently.
+
+    \item Appropriate file-size and storage management for uploaded answer images.
+\end{itemize}
+    
+    \item \textbf{Operationally deployable (practically):} The application can be deployed using commonly available web-hosting and database services. The architecture will allow the database, backend server, frontend, and file-processing components to be deployed independently when required.
+
+The OCR component can also be replaced or upgraded without redesigning the complete application, allowing future versions of SAM to use improved handwriting-recognition technologies.
+
+\end{enumerate}
+
+\section{Engine availability heuristic}
+A mature set of software technologies is available to implement SAM as a web-based academic-management platform:
+
+\begin{itemize}
+    \item \textbf{Frontend framework:} React or equivalent modern web technology.
+
+    \item \textbf{Backend:} Node.js with Express.js for API development.
+
+    \item \textbf{Database:} MySQL for structured academic and user data.
+
+    \item \textbf{Authentication:} Session-based or token-based authentication.
+
+    \item \textbf{File processing:} Server-side handling of uploaded handwritten-answer images.
+
+    \item \textbf{OCR:} An existing OCR engine/library or API capable of processing handwritten text.
+
+    \item \textbf{Evaluation:} Rule-based, text-similarity, or appropriate semantic comparison techniques depending on the type of question.
+
+    \item \textbf{Testing:} Unit and integration testing frameworks.
+
+    \item \textbf{Version control:} Git and GitHub for collaborative development and version management.
+\end{itemize}
+
+Using mature technologies allows the project to focus on \textbf{system integration, usability, correctness, and academic utility} rather than developing fundamental infrastructure from scratch.
+
+\section{Project scope and deliverables %
+\BvrHint{\ldots iteration-friendly}}
+\subsection{Initial deliverable %
+\BvrHint{\ldots first iteration}}
+\begin{enumerate}
+    \item Student registration and login.
+
+    \item Student dashboard.
+
+    \item Academic information management and display.
+
+    \item Database integration.
+
+    \item Basic mock-test creation/access functionality.
+
+    \item Student test-attempt workflow.
+
+    \item Backend APIs for managing students, tests, and results.
+
+    \item Basic validation and error handling.
+\end{enumerate}
+
+\subsection{Subsequent deliverables}
+\begin{enumerate}
+    \item Handwritten-answer image upload.
+
+    \item Image preprocessing for improved OCR.
+
+    \item Handwritten text extraction using OCR.
+
+    \item Automated answer evaluation.
+
+    \item Storage of extracted answers and evaluation results.
+
+    \item Performance/result dashboard.
+
+    \item Improved test history and filtering.
+
+    \item OCR accuracy testing using multiple handwritten samples.
+
+    \item User testing and interface refinement.
+
+    \item Deployment of the complete system.
+\end{enumerate}
+
+\section{Risks and mitigations}
+\begin{enumerate}
+    \item \textbf{OCR inaccuracies:} Handwriting varies significantly between users and may result in incorrect text extraction. This will be mitigated through image-quality requirements, preprocessing, OCR validation, and testing with multiple handwriting samples.
+
+    \item \textbf{Poor image quality:} Blurred, poorly lit, or skewed images can reduce OCR accuracy. The system will provide basic upload guidelines and preprocessing where possible.
+
+    \item \textbf{Evaluation ambiguity:} Some academic answers may have multiple valid formulations. The evaluation component will therefore use suitable comparison methods and clearly define the types of questions supported.
+
+    \item \textbf{Processing delays:} OCR and evaluation may require more processing time than normal database operations. Processing will be optimized and tested using representative answer images.
+
+    \item \textbf{Data privacy:} Student academic information and uploaded answer sheets will be treated as application data and access will be restricted to authorized users.
+
+    \item \textbf{Integration complexity:} Frontend, backend, database, OCR, and evaluation components may produce integration issues. Development will therefore proceed incrementally with module-level and integration testing.
+
+    \item \textbf{Limited semester time:} Core academic-management and mock-test workflows will be prioritized before optional enhancements.
+\end{enumerate}
+
+\section{Summary}
+This project proposes Student Academic Manager (SAM), a centralized web-based platform designed to combine academic management with digital self-assessment. The system provides students with a unified interface for managing academic information and attempting mock tests while introducing an additional handwritten-answer workflow.
+
+The key technical feature is the integration of OCR-based handwritten text extraction and automated answer evaluation. Students can write answers on paper, upload their responses, and have the system extract and evaluate the submitted content. The project emphasizes practical software engineering through modular architecture, database integration, API development, OCR integration, testing, and measurable validation.
+
+The proposed system remains feasible within a semester by using existing mature technologies for web development, database management, OCR, and evaluation. Future extensions can include improved handwriting recognition, more advanced semantic evaluation, richer performance analytics, and support for additional academic workflows
+
+\end{document}
