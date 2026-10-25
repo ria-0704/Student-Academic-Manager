@@ -17,18 +17,22 @@ function SummaryPanel({ material, onClose }) {
   const [loading, setLoading]   = useState(false);
   const [summary, setSummary]   = useState(null);
   const [fromCache, setFromCache] = useState(false);
+  const [error, setError]       = useState(null);
   const { showToast } = useToast();
 
   const generate = async (regenerate = false) => {
     setLoading(true);
     setSummary(null);
+    setError(null);
     try {
       const r = await api.post(`/summaries/${material.id}/generate`, { summary_type: type, regenerate });
       setSummary(r.data.summary);
       setFromCache(r.data.fromCache);
       if (!r.data.fromCache) showToast('Summary generated!', 'success');
     } catch (err) {
-      showToast(err.userMessage, 'error');
+      const msg = err.userMessage || err.response?.data?.message || 'Failed to generate summary. Please try again.';
+      setError(msg);
+      showToast(msg, 'error');
     } finally {
       setLoading(false);
     }
@@ -58,6 +62,12 @@ function SummaryPanel({ material, onClose }) {
         <div className="flex items-center justify-center gap-3 py-6 text-gray-500">
           <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
           <span className="text-sm">Generating with AI… this may take a moment</span>
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          {error}
         </div>
       )}
 

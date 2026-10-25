@@ -310,7 +310,7 @@ async function generateText(prompt, maxTokens = 4096) {
   }
 }
 
-// ── Summarize document ────────────────────────────────────────────────────────
+// ── Summarize document (from pre-extracted text) ─────────────────────────────
 async function summarizeDocument(extractedText, summaryType, materialTitle) {
   const typeInstructions = {
     quick_revision: 'Create a concise quick revision summary with key points in bullet format. Keep it brief and focused on the most important concepts.',
@@ -341,6 +341,102 @@ Task: ${instruction}
 Base your summary strictly on the provided document content. Do not add information from outside the document.`;
 
   return await generateText(prompt, 3000);
+}
+
+// ── Summarize document (from raw file — fallback when text extraction failed) ─
+// Sends the file directly to Gemini as inline data. Supports PDF, PPT, PPTX.
+const fs = require('fs');
+
+const FILE_MIME_TYPES = {
+  pdf:  'application/pdf',
+  ppt:  'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+};
+
+async function summarizeDocumentFromFile(filePath, fileType, summaryType, materialTitle) {
+  const mimeType = FILE_MIME_TYPES[fileType.toLowerCase()];
+  if (!mimeType) {
+    throw new Error(`Unsupported file type for direct summarization: ${fileType}`);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error('The original file could not be found on the server. Please re-upload the material.');
+  }
+
+  const fileBuffer = fs.readFileSync(filePath);
+  const base64Data = fileBuffer.toString('base64');
+
+  // Guard against excessively large files (Gemini inline data limit ~20MB base64)
+  if (base64Data.length > 20 * 1024 * 1024) {
+    throw new Error('File is too large for direct AI processing. Please re-upload a smaller file.');
+  }
+
+  const typeInstructions = {
+    quick_revision: 'Create a concise quick revision summary with key points in bullet format. Keep it brief and focused on the most important concepts.',
+    detailed: 'Create a comprehensive detailed summary covering all major topics, concepts, and explanations in the document.',
+    exam_oriented: `Create exam-oriented notes with:
+- Important definitions and concepts
+- Key points to remember
+- Important comparisons and contrasts
+- Examples and illustrations
+- Frequently tested facts
+- Short summaries of each topic
+Format it clearly for exam revision.`,
+    simple: 'Explain the content in simple, easy-to-understand language suitable for someone new to the topic.',
+  };
+
+  const instruction = typeInstructions[summaryType] || typeInstructions.quick_revision;
+
+  const client = getClient();
+  const model = client.getGenerativeModel({ model: 'gemini-3.6-flash' });
+
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await model.generateContent({
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              text: `You are an academic assistant helping a university student study.\n\nMaterial Title: ${materialTitle}\n\nTask: ${instruction}\n\nBase your summary strictly on the content in the attached document. Do not add information from outside the document.`,
+            },
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: base64Data,
+              },
+            },
+          ],
+        }],
+        generationConfig: {
+          maxOutputTokens: 3000,
+          temperature: 0.7,
+        },
+      });
+
+      return result.response.text();
+
+    } catch (error) {
+      const message = error?.message || '';
+
+      console.error(`Gemini file attempt ${attempt}/${maxAttempts} failed`);
+      console.error('FULL GEMINI ERROR:', error);
+
+      if (
+        attempt < maxAttempts &&
+        (message.includes('503') ||
+         message.includes('Service Unavailable') ||
+         message.includes('429'))
+      ) {
+        const waitTime = attempt * 3000;
+        console.log(`Retrying Gemini in ${waitTime / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      throw error;
+    }
+  }
 }
 
 // ── Generate mock question ────────────────────────────────────────────────────
@@ -523,6 +619,7 @@ Rules:
 
 module.exports = {
   summarizeDocument,
+  summarizeDocumentFromFile,
   generateMockQuestion,
   evaluateAnswer,
   generateStudyRecommendations,

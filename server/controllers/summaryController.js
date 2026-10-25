@@ -1,5 +1,6 @@
+const fs = require('fs');
 const db = require('../db/connection');
-const { summarizeDocument } = require('../services/geminiService');
+const { summarizeDocument, summarizeDocumentFromFile } = require('../services/geminiService');
 
 // GET /api/summaries/:materialId
 async function getSummaries(req, res) {
@@ -33,8 +34,16 @@ async function generateSummary(req, res) {
 
     const material = matRows[0];
 
-    if (!material.extracted_text || material.extracted_text.trim().length < 50) {
-      return res.status(400).json({ message: 'Text could not be extracted from this file. Summarization is not available.' });
+    // Determine if we have usable extracted text
+    const hasExtractedText = material.extracted_text && material.extracted_text.trim().length >= 50;
+
+    // If no extracted text, verify the file exists before attempting fallback
+    if (!hasExtractedText) {
+      if (!material.file_path || !fs.existsSync(material.file_path)) {
+        return res.status(400).json({
+          message: 'Text could not be extracted from this file and the original file is no longer available. Please re-upload the material to enable summarization.',
+        });
+      }
     }
 
     // Check if summary already exists (and not requesting regenerate)
@@ -48,8 +57,14 @@ async function generateSummary(req, res) {
       }
     }
 
-    // Generate via Gemini
-    const content = await summarizeDocument(material.extracted_text, summary_type, material.title);
+    // Generate via Gemini — use extracted text if available, otherwise process file directly
+    let content;
+    if (hasExtractedText) {
+      content = await summarizeDocument(material.extracted_text, summary_type, material.title);
+    } else {
+      // Fallback: send the file directly to Gemini (handles PDF, PPT, PPTX including legacy .ppt)
+      content = await summarizeDocumentFromFile(material.file_path, material.file_type, summary_type, material.title);
+    }
 
     // Upsert summary
     await db.query(
