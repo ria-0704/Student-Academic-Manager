@@ -11,7 +11,7 @@ A full-stack web application for Thapar University students to manage study mate
 | Database  | MySQL (mysql2)                                 |
 | Auth      | JWT + bcryptjs                                 |
 | AI        | Google Gemini API (`gemini-1.5-flash`)         |
-| Files     | Multer (local disk storage)                    |
+| Files     | Multer (memory uploads) + private Amazon S3    |
 | Text      | pdf-parse + officeparser                       |
 
 ---
@@ -100,9 +100,13 @@ DB_PASSWORD=your_mysql_password
 DB_NAME=student_academic_manager
 JWT_SECRET=any_long_random_secret_string
 GEMINI_API_KEY=your_gemini_api_key_here
+AWS_REGION=ap-southeast-2
+S3_BUCKET=your_s3_bucket_name
 CLIENT_URL=http://localhost:5173
 PORT=5000
 ```
+
+The backend stores uploaded study materials in the configured S3 bucket. On EC2, attach an instance role with access limited to that bucket; do not put AWS access keys in the environment file. For local development, configure AWS credentials using a supported AWS CLI profile.
 
 ---
 
@@ -181,7 +185,7 @@ The app opens at `http://localhost:5173`
 
 ## Notes
 
-- Uploaded files are stored locally under `server/uploads/<userId>/<subjectId>/`
+- Uploaded files are stored in the private S3 bucket configured by `S3_BUCKET`
 - Files are served through authenticated routes — users cannot access each other's files
 - Gemini API is called only from the backend — the API key is never exposed to the client
 - Text extraction supports PDF (pdf-parse) and PPT/PPTX (officeparser)

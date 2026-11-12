@@ -345,7 +345,6 @@ Base your summary strictly on the provided document content. Do not add informat
 
 // ── Summarize document (from raw file — fallback when text extraction failed) ─
 // Sends the file directly to Gemini as inline data. Supports PDF, PPT, PPTX.
-const fs = require('fs');
 
 const FILE_MIME_TYPES = {
   pdf:  'application/pdf',
@@ -353,17 +352,12 @@ const FILE_MIME_TYPES = {
   pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 };
 
-async function summarizeDocumentFromFile(filePath, fileType, summaryType, materialTitle) {
+async function summarizeDocumentFromFile(fileBuffer, fileType, summaryType, materialTitle) {
   const mimeType = FILE_MIME_TYPES[fileType.toLowerCase()];
   if (!mimeType) {
     throw new Error(`Unsupported file type for direct summarization: ${fileType}`);
   }
 
-  if (!fs.existsSync(filePath)) {
-    throw new Error('The original file could not be found on the server. Please re-upload the material.');
-  }
-
-  const fileBuffer = fs.readFileSync(filePath);
   const base64Data = fileBuffer.toString('base64');
 
   // Guard against excessively large files (Gemini inline data limit ~20MB base64)

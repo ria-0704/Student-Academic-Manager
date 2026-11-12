@@ -1,8 +1,8 @@
 const path = require('path');
-const fs = require('fs');
 const db = require('../db/connection');
 const { extractText } = require('../utils/textExtractor');
-const { ALLOWED_TYPES } = require('../middleware/upload');
+const { ALLOWED_TYPES, createStoredFilename } = require('../middleware/upload');
+const { deleteObject, getObject, putObject } = require('../utils/objectStorage');
 
 // GET /api/materials?subject_id=X&unit_id=Y
 async function getMaterials(req, res) {
@@ -33,16 +33,14 @@ async function uploadMaterial(req, res) {
 
   const { subject_id, unit_id, title } = req.body;
   if (!subject_id || !title) {
-    // Clean up uploaded file
-    fs.unlink(req.file.path, () => {});
     return res.status(400).json({ message: 'subject_id and title are required.' });
   }
 
+  let objectLocation;
   try {
     // Verify subject ownership
     const [subCheck] = await db.query('SELECT id FROM subjects WHERE id = ? AND user_id = ?', [subject_id, req.user.id]);
     if (subCheck.length === 0) {
-      fs.unlink(req.file.path, () => {});
       return res.status(404).json({ message: 'Subject not found.' });
     }
 
@@ -50,21 +48,23 @@ async function uploadMaterial(req, res) {
     if (unit_id) {
       const [unitCheck] = await db.query('SELECT id FROM units WHERE id = ? AND user_id = ? AND subject_id = ?', [unit_id, req.user.id, subject_id]);
       if (unitCheck.length === 0) {
-        fs.unlink(req.file.path, () => {});
         return res.status(404).json({ message: 'Unit not found.' });
       }
     }
 
     const fileType = ALLOWED_TYPES[req.file.mimetype] || path.extname(req.file.originalname).replace('.', '').toLowerCase();
+    const storedFilename = createStoredFilename(req.file.originalname);
+    const objectKey = `materials/${req.user.id}/${subject_id}/${storedFilename}`;
 
-    // Extract text asynchronously (don't block response)
     let extractedText = null;
     try {
-      extractedText = await extractText(req.file.path, fileType);
+      extractedText = await extractText(req.file.buffer, fileType);
     } catch (extractErr) {
       console.warn('Text extraction failed:', extractErr.message);
       extractedText = null;
     }
+
+    objectLocation = await putObject(objectKey, req.file.buffer, req.file.mimetype);
 
     const [result] = await db.query(
       `INSERT INTO study_materials 
@@ -76,8 +76,8 @@ async function uploadMaterial(req, res) {
         unit_id || null,
         title.trim(),
         req.file.originalname,
-        req.file.filename,
-        req.file.path,
+        storedFilename,
+        objectLocation,
         fileType,
         req.file.size,
         extractedText,
@@ -97,7 +97,13 @@ async function uploadMaterial(req, res) {
     });
   } catch (err) {
     console.error('uploadMaterial error:', err);
-    fs.unlink(req.file.path, () => {});
+    if (objectLocation) {
+      try {
+        await deleteObject(objectLocation);
+      } catch (cleanupErr) {
+        console.error('Failed to clean up uploaded S3 object:', cleanupErr);
+      }
+    }
     return res.status(500).json({ message: 'Failed to upload material.' });
   }
 }
@@ -139,11 +145,7 @@ async function deleteMaterial(req, res) {
     const [check] = await db.query('SELECT * FROM study_materials WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
     if (check.length === 0) return res.status(404).json({ message: 'Material not found.' });
 
-    // Delete file from disk
-    fs.unlink(check[0].file_path, (err) => {
-      if (err) console.warn('Could not delete file:', err.message);
-    });
-
+    await deleteObject(check[0].file_path);
     await db.query('DELETE FROM study_materials WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
     return res.json({ message: 'Material deleted.' });
   } catch (err) {
@@ -159,12 +161,10 @@ async function downloadMaterial(req, res) {
     if (check.length === 0) return res.status(404).json({ message: 'Material not found.' });
 
     const material = check[0];
-    if (!fs.existsSync(material.file_path)) {
-      return res.status(404).json({ message: 'File not found on server.' });
-    }
-
+    const fileBuffer = await getObject(material.file_path);
     res.setHeader('Content-Disposition', `inline; filename="${material.original_filename}"`);
-    res.sendFile(path.resolve(material.file_path));
+    res.type(material.file_type);
+    return res.send(fileBuffer);
   } catch (err) {
     console.error('downloadMaterial error:', err);
     return res.status(500).json({ message: 'Failed to serve file.' });
