@@ -151,7 +151,7 @@ Today's Date: ${new Date().toISOString().split('T')[0]}`;
     if (err.message.includes('GEMINI_API_KEY')) {
       return res.status(500).json({ message: 'AI service is not configured.' });
     }
-    return res.status(500).json({ message: 'Failed to generate tasks.' });
+    return res.status(500).json({ message: err.message || 'Failed to generate tasks.' });
   }
 }
 

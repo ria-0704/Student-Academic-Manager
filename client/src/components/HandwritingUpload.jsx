@@ -88,7 +88,7 @@ export default function HandwritingUpload({ onExtracted, onError }) {
 
       const response = await api.post('/mock/ocr', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 60000, // OCR can take time on large/complex images
+        timeout: 120000, // OCR can take time on large/complex images
       });
 
       const text = response.data.extracted_text || '';
