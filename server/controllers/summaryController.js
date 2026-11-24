@@ -1,6 +1,7 @@
 const db = require('../db/connection');
 const { summarizeDocument, summarizeDocumentFromFile } = require('../services/geminiService');
 const { getObject } = require('../utils/objectStorage');
+const { extractText } = require('../utils/textExtractor');
 
 // GET /api/summaries/:materialId
 async function getSummaries(req, res) {
@@ -50,11 +51,26 @@ async function generateSummary(req, res) {
 
     // Generate via Gemini — use extracted text if available, otherwise process file directly
     let content;
-    if (hasExtractedText) {
-      content = await summarizeDocument(material.extracted_text, summary_type, material.title);
-    } else {
+    let text = hasExtractedText ? material.extracted_text : null;
+
+    if (!text) {
+      // Text wasn't extracted at upload time (e.g. older uploads) — try again now and save it
       const fileBuffer = await getObject(material.file_path);
-      content = await summarizeDocumentFromFile(fileBuffer, material.file_type, summary_type, material.title);
+      try {
+        const fresh = await extractText(fileBuffer, material.file_type);
+        if (fresh && fresh.trim().length >= 50) {
+          text = fresh;
+          await db.query('UPDATE study_materials SET extracted_text = ? WHERE id = ?', [fresh, material.id]);
+        }
+      } catch (extractErr) {
+        console.warn('Re-extraction failed:', extractErr.message);
+      }
+      if (!text) {
+        content = await summarizeDocumentFromFile(fileBuffer, material.file_type, summary_type, material.title);
+      }
+    }
+    if (text) {
+      content = await summarizeDocument(text, summary_type, material.title);
     }
 
     // Upsert summary
