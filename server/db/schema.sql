@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS mock_attempts (
   score DECIMAL(5,2),
   max_marks INT NOT NULL,
   status ENUM('submitted', 'evaluated') DEFAULT 'submitted',
+  answer_type ENUM('typed', 'handwritten') NOT NULL DEFAULT 'typed',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (question_id) REFERENCES mock_questions(id) ON DELETE CASCADE
